@@ -73,6 +73,8 @@ class PhotonAnalyzer( Analyzer ):
 
         if self.doFootprintRemovedIsolation:
             # values are taken from EGamma implementation: https://github.com/cms-sw/cmssw/blob/CMSSW_7_6_X/RecoEgamma/PhotonIdentification/plugins/PhotonIDValueMapProducer.cc#L198-L199
+
+
             self.IsolationComputer.setPackedCandidates(self.handles['packedCandidates'].product(), -1, 0.1, 0.2)
 
         # Photon scale calibrations

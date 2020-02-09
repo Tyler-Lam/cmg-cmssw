@@ -181,6 +181,9 @@ photonType = NTupleObjectType("gamma", baseObjectTypes = [ particleType ], varia
     NTupleVariable("mcMatchId",  lambda x : getattr(x, 'mcMatchId', -99), int, mcOnly=True, help="Match to source from hard scatter (pdgId of heaviest particle in chain, 25 for H, 6 for t, 23/24 for W/Z), zero if non-prompt or fake"),
     NTupleVariable("mcPt",   lambda x : x.mcGamma.pt() if getattr(x,"mcGamma",None) else 0., mcOnly=True, help="p_{T} of associated gen photon"),
     NTupleVariable("hasGainSwitchFlag", lambda x: x.userInt("hasGainSwitchFlag") if x.hasUserInt('hasGainSwitchFlag') else -1, int, help="photon has gain switched"),
+    NTupleVariable("x", lambda x: x.caloPosition().x(), float, help="Photon Calo Position X"),
+    NTupleVariable("y", lambda x: x.caloPosition().y(), float, help="Photon Calo Position Y"),
+    NTupleVariable("z", lambda x: x.caloPosition().z(), float, help="Photon Calo Position Z"),
 ])
 
 ##------------------------------------------  
