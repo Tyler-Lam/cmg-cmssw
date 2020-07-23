@@ -180,10 +180,21 @@ photonType = NTupleObjectType("gamma", baseObjectTypes = [ particleType ], varia
     NTupleVariable("relIso", lambda x : x.ftprRelIso03 if hasattr(x,'ftprRelIso03') else x.relIso, float, help="relativeIsolation for photons with footprint removal and pile-up correction"),
     NTupleVariable("mcMatchId",  lambda x : getattr(x, 'mcMatchId', -99), int, mcOnly=True, help="Match to source from hard scatter (pdgId of heaviest particle in chain, 25 for H, 6 for t, 23/24 for W/Z), zero if non-prompt or fake"),
     NTupleVariable("mcPt",   lambda x : x.mcGamma.pt() if getattr(x,"mcGamma",None) else 0., mcOnly=True, help="p_{T} of associated gen photon"),
+    NTupleVariable("mcEta", lambda x: x.mcGamma.eta() if getattr(x, "mcGamma", None) else -999., mcOnly = True, help="eta of associated gen photon"),
+    NTupleVariable("mcPhi", lambda x : x.mcGamma.phi() if getattr(x, "mcGamma", None) else -999., mcOnly = True, help="phi of associated gen photon"),
+    NTupleVariable("mcMotherId", lambda x: getattr(x, "mcMotherId", -99), int,mcOnly = True, help = "ID of mother if matched to gen photon with mother, 0 otherwise"),
     NTupleVariable("hasGainSwitchFlag", lambda x: x.userInt("hasGainSwitchFlag") if x.hasUserInt('hasGainSwitchFlag') else -1, int, help="photon has gain switched"),
+    NTupleVariable("isEE", lambda x: x.isEE(), int, help = "Photon is in EE"),
+    NTupleVariable("isEB", lambda x: x.isEB(), int, help = "Photon is in EB"),
+    NTupleVariable("passElectronVeto", lambda x: x.passElectronVeto(), int, "Conversion Safe Electron Veto"),
+    NTupleVariable("hasPixelSeed", lambda x: x.hasPixelSeed(), int, "Pixel Seed Veto"),
+    NTupleVariable("MVANonTrigV1Values", lambda x: x.userFloat("PhotonMVAEstimatorRun2Spring16NonTrigV1Values"), float, help = "PhotonMVAEstimatorRun2Spring16NonTrigV1Values"),
+    NTupleVariable("MVAv1Values", lambda x: x.userFloat("PhotonMVAEstimatorRunIIFall17v1Values"), float, help = "PhotonMVAEstimatorRunIIFall17v1Values"),
+    NTupleVariable("MVAv1p1Values", lambda x: x.userFloat("PhotonMVAEstimatorRunIIFall17v1p1Values"), float, help = "PhotonMVAEstimatorRunIIFall17v1p1Values"),
     NTupleVariable("x", lambda x: x.caloPosition().x(), float, help="Photon Calo Position X"),
     NTupleVariable("y", lambda x: x.caloPosition().y(), float, help="Photon Calo Position Y"),
     NTupleVariable("z", lambda x: x.caloPosition().z(), float, help="Photon Calo Position Z"),
+    NTupleVariable("energy", lambda x: x.p4(2).energy(), float, help = "Photon Energy"),
 ])
 
 ##------------------------------------------  

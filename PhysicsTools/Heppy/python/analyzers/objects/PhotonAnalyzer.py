@@ -172,77 +172,98 @@ class PhotonAnalyzer( Analyzer ):
         event.genPhotonsMatched = [ x for x in event.genPhotonsWithMom if abs(x.mother(0).pdgId())<23 or x.mother(0).pdgId()==2212 ]
         match = matchObjectCollection3(event.allphotons, event.genPhotonsMatched, deltaRMax = 0.1)
         matchNoMom = matchObjectCollection3(event.allphotons, event.genPhotonsWithoutMom, deltaRMax = 0.1)
+        matchMom = matchObjectCollection3(event.allphotons, event.genPhotonsWithMom, deltaRMax = 0.1)
+        genParticles = filter(lambda x: x.status()==1, event.genParticles)
+        genEle = filter(lambda x: abs(x.pdgId())==11, genParticles)
+        matchEle = matchObjectCollection3(event.allphotons, genEle, deltaRMax = 0.1)
+        matchGen = matchObjectCollection3(event.allphotons, genParticles, deltaRMax = 0.1)
         packedGenParts = [ p for p in self.mchandles['packedGen'].product() if abs(p.eta()) < 3.1 ]
         partons = [ p for p in self.mchandles['prunedGen'].product() if (p.status()==23 or p.status()==22) and abs(p.pdgId())<22 ]
         for gamma in event.allphotons:
-          gen = match[gamma]
-          gamma.mcGamma = gen
-          if gen and gen.pt()>=0.5*gamma.pt() and gen.pt()<=2.*gamma.pt():
-            gamma.mcMatchId = 22
-            sumPt03 = 0.;
-            sumPt04 = 0.;
-            for part in packedGenParts:
-              if abs(part.pdgId())==12: continue # exclude neutrinos
-              if abs(part.pdgId())==14: continue
-              if abs(part.pdgId())==16: continue
-              if abs(part.pdgId())==18: continue
-              deltar = deltaR(gen.eta(), gen.phi(), part.eta(), part.phi())
-              if deltar <= 0.3:
-                sumPt03 += part.pt()
-              if deltar <= 0.4:
-                sumPt04 += part.pt()
-            sumPt03 -= gen.pt()
-            sumPt04 -= gen.pt()
-            if sumPt03<0. : sumPt03=0.
-            if sumPt04<0. : sumPt04=0.
-            gamma.genIso03 = sumPt03
-            gamma.genIso04 = sumPt04
-            # match to parton
-            deltaRmin = 999.
-            for p in partons:
-              deltar = deltaR(gen.eta(), gen.phi(), p.eta(), p.phi())
-              if deltar < deltaRmin:
-                deltaRmin = deltar
-            gamma.drMinParton = deltaRmin
-          else:
-            genNoMom = matchNoMom[gamma]
-            if genNoMom:
-              gamma.mcMatchId = 7
-              sumPt03 = 0.;
-              sumPt04 = 0.;
-              for part in packedGenParts:
-                if abs(part.pdgId())==12: continue # exclude neutrinos
-                if abs(part.pdgId())==14: continue
-                if abs(part.pdgId())==16: continue
-                if abs(part.pdgId())==18: continue
-                deltar = deltaR(genNoMom.eta(), genNoMom.phi(), part.eta(), part.phi())
-                if deltar <= 0.3:
-                  sumPt03 += part.pt()
-                if deltar <= 0.4:
-                  sumPt04 += part.pt()
-              sumPt03 -= genNoMom.pt()
-              sumPt04 -= genNoMom.pt()
-              if sumPt03<0. : sumPt03=0.
-              if sumPt04<0. : sumPt04=0.
-              gamma.genIso03 = sumPt03
-              gamma.genIso04 = sumPt04
-              # match to parton
-              deltaRmin = 999.
-              for p in partons:
-                deltar = deltaR(genNoMom.eta(), genNoMom.phi(), p.eta(), p.phi())
-                if deltar < deltaRmin:
-                  deltaRmin = deltar
-              gamma.drMinParton = deltaRmin
+            gen = match[gamma]
+            genMom = matchMom[gamma]
+            gamma.mcGamma = genMom
+            if genMom:
+                gamma.mcMotherId = genMom.mother().pdgId()
+                gamma.mcMatchId = 22
             else:
-              gamma.mcMatchId = 0
-              gamma.genIso03 = -1.
-              gamma.genIso04 = -1.
-              gamma.drMinParton = -1.
+                gamma.mcMotherId = 0
+                gamma.mcMatchId = 0
+            if gen and gen.pt()>=0.5*gamma.pt() and gen.pt()<=2.*gamma.pt():
+                sumPt03 = 0.;
+                sumPt04 = 0.;
+                for part in packedGenParts:
+                  if abs(part.pdgId())==12: continue # exclude neutrinos
+                  if abs(part.pdgId())==14: continue
+                  if abs(part.pdgId())==16: continue
+                  if abs(part.pdgId())==18: continue
+                  deltar = deltaR(gen.eta(), gen.phi(), part.eta(), part.phi())
+                  if deltar <= 0.3:
+                      sumPt03 += part.pt()
+                  if deltar <= 0.4:
+                      sumPt04 += part.pt()
+                sumPt03 -= gen.pt()
+                sumPt04 -= gen.pt()
+                if sumPt03<0. : sumPt03=0.
+                if sumPt04<0. : sumPt04=0.
+                gamma.genIso03 = sumPt03
+                gamma.genIso04 = sumPt04
+                # match to parton
+                deltaRmin = 999.
+                for p in partons:
+                    deltar = deltaR(gen.eta(), gen.phi(), p.eta(), p.phi())
+                    if deltar < deltaRmin:
+                        deltaRmin = deltar
+                    gamma.drMinParton = deltaRmin
+            else:
+                genNoMom = matchNoMom[gamma]
+                if genNoMom:
+                    gamma.mcMatchId = 7
+                    sumPt03 = 0.;
+                    sumPt04 = 0.;
+                    for part in packedGenParts:
+                        if abs(part.pdgId())==12: continue # exclude neutrinos
+                        if abs(part.pdgId())==14: continue
+                        if abs(part.pdgId())==16: continue
+                        if abs(part.pdgId())==18: continue
+                        deltar = deltaR(genNoMom.eta(), genNoMom.phi(), part.eta(), part.phi())
+                        if deltar <= 0.3:
+                            sumPt03 += part.pt()
+                        if deltar <= 0.4:
+                            sumPt04 += part.pt()
+                        sumPt03 -= genNoMom.pt()
+                        sumPt04 -= genNoMom.pt()
+                        if sumPt03<0. : sumPt03=0.
+                        if sumPt04<0. : sumPt04=0.
+                        gamma.genIso03 = sumPt03
+                        gamma.genIso04 = sumPt04
+                        # match to parton
+                        deltaRmin = 999.
+                        for p in partons:
+                            deltar = deltaR(genNoMom.eta(), genNoMom.phi(), p.eta(), p.phi())
+                            if deltar < deltaRmin:
+                                deltaRmin = deltar
+                            gamma.drMinParton = deltaRmin
+                else:
+                    gamma.genIso03 = -1.
+                    gamma.genIso04 = -1.
+                    gamma.drMinParton = -1.
+            
 
-
-
-
-
+            if not gamma.mcMatchId or abs(gamma.mcMatchId) != 22:
+                gen = matchEle[gamma]
+                if gen:
+                    gamma.mcMatchId = gen.pdgId()
+                    gamma.mcMotherId = gen.mother().pdgId()
+            else:
+                gen = matchGen[gamma]
+                if gen:
+                    gamma.mcMatchId = gen.pdgId()
+                    gamma.mcMotherId = gen.mother().pdgId()
+                else:
+                    gamma.mcMatchId = 0
+                    gamma.mcMotherId = 0
+            
     def checkMatch( self, eta, phi, particles, deltar ):
 
       for part in particles:
